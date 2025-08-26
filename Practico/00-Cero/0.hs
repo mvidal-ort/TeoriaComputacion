@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-tabs #-}
 
 import Prelude
+import System.Win32 (COORD(xPos))
 
-data ABB a = Hoja | Nodo (ABB a) a (ABB a) deriving Show
+
 
 -- not con λ − notation
 notA :: Bool -> Bool
@@ -114,11 +115,82 @@ lengthP (x:xs) = 1+(lengthP xs)
 --(b) map :: (a -> b) -> [a] -> [b]
 -- Ej. map even [1,4,3,0] = [False, True, False, True]
 
-mapA :: (a -> b) -> [a] -> [b]
-mapA _ [] = []
-mapA f (x:xs) = f x : (mapA f xs)
+mapP :: (a -> b) -> [a] -> [b]
+mapP _ [] = []
+mapP f (x:xs) = f x : (mapP f xs)
+
+-- (c) filter :: (a -> Bool) -> [a] -> [a]
+-- Ej. filter even [1,6,5,3,2] = [6,2]
+
+filterP :: (a -> Bool) -> [a] -> [a]
+filterP _ [] = []
+filterP f (x:xs) 
+    | f x == True = x : filterP f xs
+    | f x == False = filterP f (xs)
+
+-- (d) zip :: [a] -> [b] -> [(a,b)]
+-- Ej. zip [1,5,4,2] [True, True, False] = [(1,True), (5,True), (4,False)]
+
+zipP :: [a] -> [b] -> [(a,b)]
+zipP [] [] = []
+zipP (x:xs) [] = []
+zipP [] (y:ys)  = []
+zipP (x:xs) (y:ys)  = (x,y):zipP (xs)(ys)
+
+-- (4) Listas con tipos:
+
+-- (a) sum :: [Integer] -> Integer
+-- Ej. sum [6,5,2] = 6 + 5 + 2 = 13
+sumP :: [Integer] -> Integer
+sumP [] = 0
+sumP (x:xs) = x + sumP xs
+
+-- (b) prod :: [Integer] -> Integer
+-- Ej. prod [1,5,2,0] = 1 * 5 * 2 * 0 = 0
+prodP :: [Integer] -> Integer
+prodP [] = 1
+prodP (x:xs) = x * prodP xs
+
+-- (c) and :: [Bool] -> Bool
+-- Ej. and [True, True, False] = True && True && False = False
+andPL :: [Bool] -> Bool
+andPL [] = True
+andPL (x:xs) 
+    | x == True = andPL xs
+    | x == False = False
+
+-- (d) or :: [Bool] -> Bool
+-- Ej. or [True, True, True] = True || True || True = True
+orPL :: [Bool] -> Bool
+orPL [] = False
+orPL (x:xs) 
+    | x == False = orPL xs
+    | x == True = True
 
 -- Arboles
+
+data Arb a = H a | Nd (Arb a) a (Arb a) deriving Show
+
+--(a) λ − notation y case:
+cantNodos:: Arb a -> Integer
+cantNodos = \a -> case a of {
+        H x -> 0;
+        Nd i x d -> 1+(cantNodos i)+(cantNodos d)
+    }
+--Pattern-Matching:
+cantNodosP:: Arb a -> Integer
+cantNodosP (H x) = 0
+cantNodosP (Nd i x d) = 1+(cantNodosP i)+(cantNodosP d)
+
+
+-- (b) cantHojas :: Arb a -> Integer
+-- (c) cantA :: Arb a -> Integer
+-- (d) listA :: Arb a -> [a]
+-- (e) mapF :: (a -> b) -> Arb a -> Arb b
+
+
+
+data ABB a = Hoja | Nodo (ABB a) a (ABB a) deriving Show
 
 insert :: Ord a => a -> ABB a -> ABB a
 insert x Hoja = Nodo Hoja x Hoja
