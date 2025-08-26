@@ -182,12 +182,20 @@ cantNodosP:: Arb a -> Integer
 cantNodosP (H x) = 0
 cantNodosP (Nd i x d) = 1+(cantNodosP i)+(cantNodosP d)
 
-
 -- (b) cantHojas :: Arb a -> Integer
--- (c) cantA :: Arb a -> Integer
--- (d) listA :: Arb a -> [a]
--- (e) mapF :: (a -> b) -> Arb a -> Arb b
+cantHojas :: Arb a -> Integer
+cantHojas (H x) = 1
+cantHojas (Nd i x d) = (cantHojas i)+(cantHojas d)
 
+-- (c) cantA :: Arb a -> Integer //supongo que será cantidad total de nodos y hojas
+-- (d) listA :: Arb a -> [a] // supongo que será una recorrida, esta inoder mas abajo
+
+-- (e) mapF :: (a -> b) -> Arb a -> Arb b
+mapF :: (a -> b) -> Arb a -> Arb b
+mapF f (H x)       = H (f x)
+mapF f (Nd i x d)  = Nd (mapF f i) (f x) (mapF f d)
+
+-- Esta solucion supone un arbol generico que mantiene la forma al aplicar la funcion que recibe map por parametro
 
 
 data ABB a = Hoja | Nodo (ABB a) a (ABB a) deriving Show
