@@ -56,7 +56,31 @@ lkup :: X -> M -> V
 lkup x [] = error "Variable no definida"
 lkup x ((x',v):m) 
     | x == x' = v
-    | otherwise lkup x m
+    | otherwise =  lkup x m
+
 -- 3.3) (upd: M ≺+(x, v))
+upd :: M -> (X,V) -> M
+upd [] (x0,v0) = [(x0,v0)]
+upd ((x,v):xs) (x0,v0) 
+    | (x == x0) = (x0,v0):xs
+    | otherwise = (x,v):(upd xs (x0,v0))
 
 -- 4)
+-- • belongs :: Int -> [Int] -> Bool que dado un entero z y un conjunto c, retorna True si z se encuentra en c.
+belongs :: Int -> [Int] -> Bool
+belongs z [] = False
+belongs z (x:xs)
+    | (z == x) = True
+    | otherwise = belongs z xs
+
+-- • union :: [Int] -> [Int] -> [Int]
+union :: [Int] -> [Int] -> [Int]
+union [] xs = xs
+union xs [] = xs
+union x:xs ys 
+    | (belongs x ys == True) = union xs ys
+    | otherwise = union xs x:ys
+
+-- • intersection :: [Int] -> [Int] -> [Int]
+-- • difference :: [Int] -> [Int] -> [Int]
+-- • included :: [Int] -> [Int] -> Bool
