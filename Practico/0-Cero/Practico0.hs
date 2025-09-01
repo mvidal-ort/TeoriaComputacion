@@ -77,10 +77,39 @@ belongs z (x:xs)
 union :: [Int] -> [Int] -> [Int]
 union [] xs = xs
 union xs [] = xs
-union x:xs ys 
+union (x:xs) ys 
     | (belongs x ys == True) = union xs ys
-    | otherwise = union xs x:ys
+    | otherwise = union xs (x:ys)
 
--- • intersection :: [Int] -> [Int] -> [Int]
+-- • intersection :: [Int] -> [Int] -> [Int] 
+intersection :: [Int] -> [Int] -> [Int]
+intersection xs [] = []
+intersection [] _ = []
+intersection (x:xs) (ys)
+    | (belongs x ys == True) = x:(intersection xs ys)
+    | otherwise = intersection (xs) (ys)
+-- Esta version mantiene duplicados de la primera lista, pero asumimos que la lista que se le pasa, ya es un conjunto y no tiene duplicados.
+-- Se puede arreglar usando nub:
+-- intersection :: [Int] -> [Int] -> [Int]
+-- intersection xs ys = nub [x | x <- xs, x `elem` ys]
+
 -- • difference :: [Int] -> [Int] -> [Int]
+difference :: [Int] -> [Int] -> [Int]
+difference xs [] = xs
+difference [] xs = []
+difference (x:xs) ys 
+    | (belongs x ys == True) = difference xs ys
+    | otherwise = x:(difference xs ys)
+-- Esta version mantiene duplicados de la primera lista, pero asumimos que la lista que se le pasa, ya es un conjunto y no tiene duplicados.
+-- Se puede arreglar usando nub:
+-- difference :: [Int] -> [Int] -> [Int]
+-- difference xs ys = nub [x | x <- xs, not (x `elem` ys)]
+
 -- • included :: [Int] -> [Int] -> Bool
+included :: [Int] -> [Int] -> Bool
+included xs [] = False
+included [] _ = True
+included (x:xs) ys 
+    | (belongs x ys == True) = included xs ys
+    | otherwise = False
+
