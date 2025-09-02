@@ -65,7 +65,9 @@ upd ((x,v):xs) (x0,v0)
     | (x == x0) = (x0,v0):xs
     | otherwise = (x,v):(upd xs (x0,v0))
 
--- 4)
+-- 4) Reglas de evaluacion
+-- 4.1) Funciones auxiliares
+
 -- • belongs :: Int -> [Int] -> Bool que dado un entero z y un conjunto c, retorna True si z se encuentra en c.
 belongs :: Int -> [Int] -> Bool
 belongs z [] = False
@@ -112,4 +114,58 @@ included [] _ = True
 included (x:xs) ys 
     | (belongs x ys == True) = included xs ys
     | otherwise = False
+
+-- 4.2) Definir la funcion (parcial2) de evaluacion o funcion semantica, que recibe una memoria y una expresion, y retorna la memoria actualizada
+-- data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E
+eval :: M -> E -> (M,V)
+
+eval m (Var x)  = (m,lkup x m)
+
+eval m Empty = (m, C []) -- hay que forzar el tipo conjunto porque sino interpreta una lista.
+
+eval m (Unit z) = (m, C [z])
+
+eval m (Pert z e) = 
+    let (m', v) = eval m e
+    in  case v of
+        C xs -> (m', B (belongs z xs))
+        _ -> error "e no evalua a un conjunto, Pert no tiene sentido"
+
+eval m (Union e1 e2) =
+  let (m', C c1) = eval m e1
+      (m'', C c2) = eval m' e2
+  in (m'', C (union c1 c2))
+
+eval m (Intersection e1 e2) =
+    let (m', C c1) = eval m e1
+        (m'', C c2) = eval m' e2
+    in (m'', C (intersection c1 c2))
+
+eval m (Difference e1 e2) =
+    let (m', C c1) = eval m e1
+        (m'', C c2) = eval m' e2
+    in (m'', C (difference c1 c2))
+
+eval m (Inclusion e1 e2) =
+    let (m', C c1) = eval m e1
+        (m'', C c2) = eval m' e2
+    in (m'', B (included c1 c2))
+
+eval m (Assig x e) =  -- En este caso v puede ser tanto conjuntos como booleanos, por eso no necesita el constructor
+    let (m', v) = eval m e
+    in (upd m' (x,v), v)
+-- Si reemplazo v por C v, compila tambien y solo guarda cuando evalua a Conjuntos y no booleanos
+-- Pero puede dar error en tiempo de ejecucion de pattern matching si la expresion evalua a un bool
+
+
+-- 6) Extendiendo
+-- por ejemplo en la parte c) que quiere calcular el largo de un conjunto:
+-- hay que extender el data E = Var X | Empty ... Assig X E | Len E
+-- hay que extender los valores que puede tomar V = ... | Z Int
+-- ya que al hacer eval m (Len e) vamos a querer que el valor sea de tipo Int
+-- eval m (Len e) = let (m', C v) = eval m e
+--                  in  (m', length v)
+
+-- Para el conjunto potencia (es un conjunto de conjuntos) voy a tener que usar una funcion del preludio que 
+-- aparentemente se llama subsequences (investigar)
 
