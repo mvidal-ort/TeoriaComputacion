@@ -4,6 +4,8 @@
 
 module Practico0 where
 
+import Data.List (subsequences)
+
 -- eval  m (Pert z e) = let (m', C c) = eval m e    
 --                         in (m', belongs z c)
 
@@ -39,13 +41,26 @@ module Practico0 where
 -- z ::= Z (enteros)
 
 -- 1)
-data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E
+data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E | Pot E | Equal E E | Len E
+
+-- El data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E
+-- Se extendio por la parte 6
+
+-- 6. Realizar todos los cambios necesarios para que el lenguaje desarrollado en
+-- las partes anteriores permita hallar:
+-- (a) El conjunto potencia (o partes) de un conjunto dado
+-- (b) Dados dos conjuntos determinar si son iguales
+-- (c) Calcular el largo/cardinal de un conjunto dado
+
 
 type X = String
 type Z = Int
 
 -- 2)
-data V = B Bool | C [Z] deriving Show
+data V = B Bool | C [Z] | P[[Z]] | I Int deriving Show
+
+-- Por 6) extiende tambien el data V = B Bool | C [Z] 
+-- ya que se necesita conjunto de conjuntos para potencia y se necesita enteros para cardinal de un conjunto
 
 -- 3)
 -- 3.1)
@@ -82,6 +97,7 @@ union xs [] = xs
 union (x:xs) ys 
     | (belongs x ys == True) = union xs ys
     | otherwise = union xs (x:ys)
+-- Sacar los repetidos
 
 -- • intersection :: [Int] -> [Int] -> [Int] 
 intersection :: [Int] -> [Int] -> [Int]
@@ -157,6 +173,75 @@ eval m (Assig x e) =  -- En este caso v puede ser tanto conjuntos como booleanos
 -- Si reemplazo v por C v, compila tambien y solo guarda cuando evalua a Conjuntos y no booleanos
 -- Pero puede dar error en tiempo de ejecucion de pattern matching si la expresion evalua a un bool
 
+-- Extendiendo por 6)
+eval m (Pot e) =
+    let (m', C xs) = eval m e
+    in (m', P (subsequences xs))
+
+-- 5) data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E
+
+-- conj1 ::E, que represente al conjunto {1,2,3}.
+conj1 :: E
+conj1 = Union ( Union (Unit 1) (Unit 2) ) (Unit 3) 
+
+-- conj2 ::E, que represente al conjunto {2,3,4}.
+conj2 :: E
+conj2 = Union ( Union (Unit 2) (Unit 3) ) (Unit 4) 
+
+-- conj3 ::E, que represente a la union de conj1 y conj2
+-- ({1,2,3} ∪ {2,3,4}).
+conj3 :: E
+conj3 = Union conj1 conj2
+
+-- conj4 ::E, que represente a la intersecci´on de conj1 y conj2
+-- ({1,2,3} ∩ {2,3,4}).
+conj4 :: E
+conj4 = Intersection conj1 conj2
+
+-- pert1 ::E, que represente a la expresi´on que dice si el entero 2
+-- pertenece a conj1 (2 ∈ {1,2,3}).
+pert1 ::E
+pert1 = Pert 2 conj1
+
+-- pert2 ::E, que represente a la expresi´on que dice si el entero 3
+-- pertenece a conj4 (3 ∈ ({1,2,3} ∩ {2,3,4})).
+pert2 ::E
+pert2 = Pert 2 conj4
+
+-- incl1 ::E, que represente a la expresi´on que dice si conj1 est´a incluido
+-- en conj2 ({1,2,3} ⊆ {2,3,4}).
+incl1 :: E
+incl1 = Inclusion conj1 conj2
+
+-- incl2 ::E, que represente a la expresi´on que dice si conj4 est´a incluido
+-- en conj2 (({1,2,3} ∩ {2,3,4}) ⊆ {2,3,4}).
+incl2 :: E
+incl2 = Inclusion conj4 conj2
+
+-- incl3 ::E, que represente a la expresi´on que dice si conj1 est´a incluido
+-- en conj3 ({1,2,3} ⊆ ({1,2,3} ∪ {2,3,4})).
+incl3 :: E
+incl3 = Inclusion conj1 conj3
+
+-- ass1 ::E, que represente a la expresi´on donde se asigna a una variable
+-- w el conjunto conj1 (w := {1,2,3}).
+ass1 :: E
+ass1 = Assig "w" conj1 
+
+-- ass2 ::E, que represente a la expresi´on donde se asigna a una variable
+-- x el conjunto conj4 (x := {1,2,3} ∩ {2,3,4}).
+ass2 :: E
+ass2 = Assig "x" conj4
+
+-- ass3 ::E, que represente a la expresi´on donde se asigna a una variable
+-- y el resultado de pert2 (y := 3 ∈ ({1,2,3} ∩ {2,3,4})).
+ass3 :: E
+ass3 = Assig "y" pert2
+
+-- ass4 ::E, que represente a la expresi´on donde se asigna a una variable
+-- z el resultado de incl2 (z := ({1,2,3} ∩ {2,3,4}) ⊆ {2,3,4}).
+ass4 :: E
+ass4 = Assig "z" incl2
 
 -- 6) Extendiendo
 -- por ejemplo en la parte c) que quiere calcular el largo de un conjunto:
@@ -168,4 +253,28 @@ eval m (Assig x e) =  -- En este caso v puede ser tanto conjuntos como booleanos
 
 -- Para el conjunto potencia (es un conjunto de conjuntos) voy a tener que usar una funcion del preludio que 
 -- aparentemente se llama subsequences (investigar)
+
+-- 6. Realizar todos los cambios necesarios para que el lenguaje desarrollado en
+-- las partes anteriores permita hallar:
+
+-- data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E | Pot E | Equal E E | Len E
+-- type X = String
+-- type Z = Int
+-- data V = B Bool | C [Z] | P[[Z]] | I Int deriving Show
+-- type M = [(X,V)]
+
+-- (a) El conjunto potencia (o partes) de un conjunto dado
+
+potencia :: [Z] -> [[Z]]
+potencia = subsequences
+-- la funcion del preludio tiene el mismo tipo por lo cual no es neceario distinguir casos
+-- no sé si es necearia la funcion, ya que se puede hacer directamente el eval de Pot y llamar a susequences ahi
+
+
+
+-- (b) Dados dos conjuntos determinar si son iguales
+
+
+-- (c) Calcular el largo/cardinal de un conjunto dado
+
 
