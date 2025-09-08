@@ -97,7 +97,10 @@ union xs [] = xs
 union (x:xs) ys 
     | (belongs x ys == True) = union xs ys
     | otherwise = union xs (x:ys)
--- Sacar los repetidos
+
+-- La version anterior no elimina los repetidos, hay que agregar nub en el import
+-- union :: [Int] -> [Int] -> [Int]
+-- union xs ys = nub (xs ++ ys)
 
 -- • intersection :: [Int] -> [Int] -> [Int] 
 intersection :: [Int] -> [Int] -> [Int]
@@ -177,6 +180,31 @@ eval m (Assig x e) =  -- En este caso v puede ser tanto conjuntos como booleanos
 eval m (Pot e) =
     let (m', C xs) = eval m e
     in (m', P (subsequences xs))
+
+-- eval m (Equal e1 e2) =
+--     let (m', C c1) = eval m e1
+--         (m'', C c2) = eval m e2
+--     in (m'', B (equalC c1 c2))
+-- Esta version falla por non exhaustive-pattern
+
+eval m (Equal e1 e2) =
+    let (m', v1)  = eval m e1
+        (m'', v2) = eval m' e2
+    in case (v1, v2) of
+        (C xs, C ys) -> (m'', B (equalC xs ys))
+        _            -> error "Equal aplicado a no-conjuntos"
+
+eval m (Len e) = 
+    let (m', C v) = eval m e
+    in  (m', I (length v))
+-- compila
+
+-- eval m (Cardinal e) =
+--     let (m', v) = eval m e
+--     in case v of
+--         C xs -> (m', I (length xs))
+--         _    -> error "Cardinal aplicado a un no-conjunto"
+-- con control de errores para evitar calcular largo sobre expresiones que no evaluan a conjuntos
 
 -- 5) data E = Var X | Empty | Unit Z | Pert Z E | Union E E | Intersection E E | Difference E E | Inclusion E E | Assig X E
 
@@ -264,17 +292,15 @@ ass4 = Assig "z" incl2
 -- type M = [(X,V)]
 
 -- (a) El conjunto potencia (o partes) de un conjunto dado
-
 potencia :: [Z] -> [[Z]]
 potencia = subsequences
 -- la funcion del preludio tiene el mismo tipo por lo cual no es neceario distinguir casos
--- no sé si es necearia la funcion, ya que se puede hacer directamente el eval de Pot y llamar a susequences ahi
-
-
+-- no sé si es necesaria la funcion, ya que se puede hacer directamente el eval de Pot y llamar a susequences ahi
 
 -- (b) Dados dos conjuntos determinar si son iguales
+equalC :: [Z] -> [Z] -> Bool
+equalC xs ys = included xs ys && included ys xs
 
 
 -- (c) Calcular el largo/cardinal de un conjunto dado
-
-
+-- usa el lenght del preludio, va sobre el eval directo
