@@ -20,3 +20,34 @@ module Practico1 where
 --         (xs, e') -> case length xs == length es of
 --             True -> weak (efecto e' (zip xs es))
 -- weak (Rec x e) = weak (efecto e [(x, Rec x e)])
+
+-- Ejercicio 7, chi es no tipado, pero cuando se embebe en Haskell, necesitamos tipos.
+-- El tipo que vamos a usar es el data de E, es decir. Por lo tanto las funciones de este ejercicio van a tener ese tipo
+-- En la solucion mia, puse de E -> E, esto esta mal, no hay que hacer esto
+-- Estas funciones son programas que existen por si solas
+-- en la solución de los profesores es de tipo E solo,
+
+
+-- or' :: E
+-- or' = Abs "b1" (Abs "b2" (Case (Var "b1") [
+--         ("True",([], Cons "True" [])),
+--         ("False",([], Var "b2"))
+--     ]))
+
+-- triple :: E
+-- triple = Rec "triple" (Abs "n" (Case (Var "n") [
+--         ("O", ([], Cons "O" [])),
+--         ("S",(["x"], Cons "S" [Cons "S" [Cons "S" [Ap (Var "triple") (Var "x")]]]))
+--     ]))
+
+-- duplicar :: E
+-- duplicar = Rec "duplicar" (Abs "l" (Case (Var "l") [
+--         ("[]",([],Cons "[]" [])),
+--         (":",(["x","xs"], Cons ":" [Var "x", Cons ":" [Var "x", Ap (Var "duplicar") (Var "xs")]]))
+--     ]))
+
+-- ramaC :: E
+-- ramaC = Rec "ramaC" (Abs "t" (Case (Var "t") [
+--         ("H", (["x"], Cons ":" [Var "x", Cons "[]" []])),
+--         ("N",(["i","c","d","x"], Cons ":" [Var "x", Ap (Var "ramaC") (Var "c")]))
+--     ]))
