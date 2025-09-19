@@ -4,6 +4,29 @@
 
 module Practico1 where
 
+data E =
+        Var X
+    |   Cons K [E]
+    |   Abs X E
+    |   Ap E E
+    |   Case E [B]
+    |   Rec X E
+    deriving (Show)
+type B = (K,([X],E))
+type X = String
+type K = String
+
+data V = 
+        ConsV K [V]
+    |   AbsV X E -- este es un lambda, en la clase usó LamV String Exp
+    deriving (Show)
+
+data W =
+        ConsW K [E]
+    |   AbsW X E -- este es un lambda, en la clase usó LamW String Exp
+
+type Sigma = [(X,E)]
+
 -- en la evaluación debil, no hay una regla en la que se evalue una variable
 -- No podemos trabajar con expresiones abiertas, solo cerradas. no hay variables libres, nunca deberia llegar a una variable para evaluar
 -- antes de llegar a donde esta la variable, deberia haber sido sustituida por algo
