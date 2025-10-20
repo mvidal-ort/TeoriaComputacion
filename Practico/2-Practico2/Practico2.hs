@@ -63,5 +63,23 @@ eval (Var x) m = case lookupM x m of
                 Just v -> v
                 Nothing -> error "no existe "
  
+exec :: Program -> M -> M
+
+-- 1. Asignación múltiple
+exec (Asig pairs) m =  --(asignacion multiple), pairs es la lista de id-Expresion
+  let (xs, es) = unzip pairs --separa la expresion del identificador
+      vs = map (`eval` m) es --evalua las expresiones bajo y las asigna a una lista de valores resultantes
+  in updateM (zip xs vs) m -- hace el update de la memoria, asignanco los valores obtenidos a los ids anteriores
+
+-- 2. Secuencia
+exec (Sec p1 p2) m =  
+  let m' = exec p1 m -- ejecuta p1 sobre m y devuelve m'
+  in exec p2 m' -- ejecuta p2 sobre la m' que devolvio antes
+
+-- 3. Local
+exec (Local xs p) m =
+  let m'  = altaM xs m
+      m'' = exec p m'
+  in bajaM xs m''
 
 
