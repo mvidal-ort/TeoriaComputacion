@@ -116,6 +116,27 @@ exec (While x branches) m =
         _ -> m
     _ -> m
 
+-- exec m (While x bs) = case (evalE m (Var x)) of
+--   Kv c vs -> case (lookup c bs) of -- hay una rama correspondiente
+--     Just (xs, p) -> case (length xs == length vs) of
+--       True ->                                                            
+--         let assign = Asig (zip xs (map valorAExpresion vs))          -- construimos local xs { xs := vs; p } ; while x is bs
+--             localBlock = Local xs (Sec assign p)
+--             fullProg = Sec localBlock (While x bs)
+--         in exec m fullProg
+--       False -> m -- aridad incorrecta → no hace nada
+--     Nothing -> m -- no hay rama → termina el while
+--   _ -> m -- x no tiene un valor constructor válido
+
+-- exec m (While x bs) =
+--   let Kv c vTecho = evalE m (Var x)
+--    in case buscarEnRamas c bs of
+--         Just (xTecho, p) -> case (length xTecho) == (length vTecho) of
+--           True ->
+--             let m' = exec m (Local xTecho (Sec (Asig (zip xTecho (map valorAExpresion vTecho))) p))
+--              in exec m' (While x bs) -- while-ii
+--         Nothing -> m -- while-i
+
 ------------------------------------------------------------
 -- Auxiliar para Case y While: busca la rama por constructor
 ------------------------------------------------------------
