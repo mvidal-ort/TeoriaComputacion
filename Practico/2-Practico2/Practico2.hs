@@ -82,4 +82,52 @@ exec (Local xs p) m =
       m'' = exec p m'
   in bajaM xs m''
 
+-- 4. Case
+-- exec (Case x branches) m =
+--   case lookupM x m of
+--     Just (Kv c vs) ->
+--       case lookupBranch c branches of
+--         Just (params, body)
+--           | length params == length vs ->
+--               let m'  = altaM params m
+--                   m'' = updateM (zip params vs) m'
+--               in bajaM params (exec body m'')
+--         _ -> m  -- no hay coincidencia o aridad incorrecta
+--     _ -> m      -- variable no definida o NULL
 
+
+exec (Case x bs) m = case (eval (Var x) m) of
+  Kv c vs -> case (lookup c bs) of
+    Just (xs, p) -> case (length xs == length vs) of
+      True -> exec (Local xs (Asig (zip xs (map valorAExpresion vs)) `Sec` p)) m
+
+
+-- 5. While
+exec (While x branches) m =
+  case lookupM x m of
+    Just (Kv c vs) ->
+      case lookupBranch c branches of
+        Just (params, body)
+          | length params == length vs ->
+              let m'  = altaM params m
+                  m'' = updateM (zip params vs) m'
+                  m''' = exec body m''
+              in exec (While x branches) (bajaM params m''')
+        _ -> m
+    _ -> m
+
+------------------------------------------------------------
+-- Auxiliar para Case y While: busca la rama por constructor
+------------------------------------------------------------
+
+lookupBranch :: Id -> [B] -> Maybe ([Id], Program)
+lookupBranch _ [] = Nothing
+lookupBranch c ((c',bp):bs)
+  | c == c'   = Just bp
+  | otherwise = lookupBranch c bs
+
+-- buscarEnRamas :: Id -> [B] -> Maybe ([Id], Program)
+-- buscarEnRamas id bs = lookup id bs
+
+valorAExpresion :: V -> E
+valorAExpresion (Kv id vs) = K id (map valorAExpresion vs)
