@@ -62,39 +62,23 @@ eval (K c es) m = Kv c (map (`eval` m) es )
 eval (Var x) m = case lookupM x m of 
                 Just v -> v
                 Nothing -> error "no existe "
- 
+         
 exec :: Program -> M -> M
 
--- 1. Asignación múltiple
 exec (Asig pairs) m =  --(asignacion multiple), pairs es la lista de id-Expresion
   let (xs, es) = unzip pairs --separa la expresion del identificador
       vs = map (`eval` m) es --evalua las expresiones bajo y las asigna a una lista de valores resultantes
   in updateM (zip xs vs) m -- hace el update de la memoria, asignanco los valores obtenidos a los ids anteriores
 
--- 2. Secuencia
+
 exec (Sec p1 p2) m =  
   let m' = exec p1 m -- ejecuta p1 sobre m y devuelve m'
   in exec p2 m' -- ejecuta p2 sobre la m' que devolvio antes
 
--- 3. Local
 exec (Local xs p) m =
   let m'  = altaM xs m
       m'' = exec p m'
   in bajaM xs m''
-
--- 4. Case
--- exec (Case x branches) m =
---   case lookupM x m of
---     Just (Kv c vs) ->
---       case lookupBranch c branches of
---         Just (params, body)
---           | length params == length vs ->
---               let m'  = altaM params m
---                   m'' = updateM (zip params vs) m'
---               in bajaM params (exec body m'')
---         _ -> m  -- no hay coincidencia o aridad incorrecta
---     _ -> m      -- variable no definida o NULL
-
 
 exec (Case x bs) m = case (eval (Var x) m) of
   Kv c vs -> case (lookup c bs) of
@@ -102,53 +86,59 @@ exec (Case x bs) m = case (eval (Var x) m) of
       True -> exec (Local xs (Asig (zip xs (map valorAExpresion vs)) `Sec` p)) m
 
 
--- 5. While
-exec (While x branches) m =
-  case lookupM x m of
-    Just (Kv c vs) ->
-      case lookupBranch c branches of
-        Just (params, body)
-          | length params == length vs ->
-              let m'  = altaM params m
-                  m'' = updateM (zip params vs) m'
-                  m''' = exec body m''
-              in exec (While x branches) (bajaM params m''')
-        _ -> m
-    _ -> m
-
--- exec m (While x bs) = case (evalE m (Var x)) of
---   Kv c vs -> case (lookup c bs) of -- hay una rama correspondiente
---     Just (xs, p) -> case (length xs == length vs) of
---       True ->                                                            
---         let assign = Asig (zip xs (map valorAExpresion vs))          -- construimos local xs { xs := vs; p } ; while x is bs
---             localBlock = Local xs (Sec assign p)
---             fullProg = Sec localBlock (While x bs)
---         in exec m fullProg
---       False -> m -- aridad incorrecta → no hace nada
---     Nothing -> m -- no hay rama → termina el while
---   _ -> m -- x no tiene un valor constructor válido
-
--- exec m (While x bs) =
---   let Kv c vTecho = evalE m (Var x)
---    in case buscarEnRamas c bs of
---         Just (xTecho, p) -> case (length xTecho) == (length vTecho) of
---           True ->
---             let m' = exec m (Local xTecho (Sec (Asig (zip xTecho (map valorAExpresion vTecho))) p))
---              in exec m' (While x bs) -- while-ii
---         Nothing -> m -- while-i
+exec (While x bs) m =
+  case eval (Var x) m of
+    Kv c vTecho ->
+      case buscarEnRamas c bs of
+        Just (xTecho, p)
+          | length xTecho == length vTecho ->
+              let m' = exec (Local xTecho (Sec (Asig (zip xTecho (map valorAExpresion vTecho))) p)) m
+              in exec (While x bs) m'  -- while-ii
+        _ -> m  -- si no hay rama o aridad distinta -> termina
+    _ -> m      -- si eval no da Kv (por ejemplo NULL), también termina
 
 ------------------------------------------------------------
 -- Auxiliar para Case y While: busca la rama por constructor
 ------------------------------------------------------------
 
-lookupBranch :: Id -> [B] -> Maybe ([Id], Program)
-lookupBranch _ [] = Nothing
-lookupBranch c ((c',bp):bs)
-  | c == c'   = Just bp
-  | otherwise = lookupBranch c bs
-
--- buscarEnRamas :: Id -> [B] -> Maybe ([Id], Program)
--- buscarEnRamas id bs = lookup id bs
+buscarEnRamas :: Id -> [B] -> Maybe ([Id], Program)
+buscarEnRamas id bs = lookup id bs
 
 valorAExpresion :: V -> E
 valorAExpresion (Kv id vs) = K id (map valorAExpresion vs)
+
+-------------------
+-------------------
+
+par :: Program
+par =
+  Asig [("res", K "False" [])] `Sec`
+  While "n"
+    [ ("Zero", ([], Asig [("res", K "True" [])]))
+    , ("Succ", (["x"],
+        Case "x"
+          [ ("Zero", ([], Asig [("res", K "False" [])]))
+          , ("Succ", (["y"], Asig [("n", Var "y")]))
+          ]
+      ))
+    ]
+
+-- 0
+n0 = Kv "Zero" []
+
+-- 1 = Succ Zero
+n1 = Kv "Succ" [n0]
+
+-- 2 = Succ (Succ Zero)
+n2 = Kv "Succ" [n1]
+
+-- 3 = Succ (Succ (Succ Zero))
+n3 = Kv "Succ" [n2]
+
+-- 4 = Succ (Succ (Succ (Succ Zero)))
+n4 = Kv "Succ" [n3]
+
+--m0 n = [("n", n)]
+m0 n = [("n", n), ("res", NULL)]
+
+
