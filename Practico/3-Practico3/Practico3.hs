@@ -101,7 +101,7 @@ codeCopiar =
 
    ("buscar", [(S "1", (R, "buscar")),
                 (S "#", (W (S "1"), "volver")),
-                (WC, (R, "buscar"))]),  -- <- por seguridad
+                (WC, (R, "buscar"))]),  
 
     ("volver",  [(S "1", (L, "volver")),
                  (S "X", (W (S "1"), "h"))])
@@ -114,8 +114,8 @@ tapeCopiar = ([], S "1", [S "1", S "1", S "#"])
 -- a la izquierda hasta encontrarse con el siımbolo σ,
 codeLsigma :: Symbol -> Code
 codeLsigma sigma =
-  [ ("i", [(sigma, (W sigma, "h")),   -- si encuentra σ, se detiene
-           (WC, (L, "i"))])           -- si no, sigue moviéndose a la izquierda
+  [ ("i", [(sigma, (W sigma, "h")),   
+           (WC, (L, "i"))])          
   ]
 
 codeLB :: Code
@@ -151,7 +151,7 @@ codeParidad =
 
 
 tapeParVacia :: Tape
-tapeParVacia = ([S "#"], S "#", [])    -- izquierda: [#], cabeza sobre #
+tapeParVacia = ([S "#"], S "#", [])   
 
 tape4 :: Tape
 tape4 = ([S "#", palo, palo, palo, palo], S "#", [])
@@ -192,7 +192,7 @@ codeElem =
 sig1 :: Symbol 
 sig1 = S "S1"
 
-sig2 :: Symbol -- Para probar con B
+sig2 :: Symbol 
 sig2 = S "S2"
 
 tapeSigmaF :: Tape
@@ -206,3 +206,4 @@ tapeSigmaT2 = ([S "#", sig1, sig2, sig2, sig2, S "#", sig1], S "#", [S "#"])
 
 tapeSigmaT3 :: Tape
 tapeSigmaT3 = ([S "#", sig2, sig2, sig2, sig1, S "#", sig1], S "#", [S "#"])
+---------------
