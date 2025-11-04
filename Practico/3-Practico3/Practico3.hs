@@ -207,3 +207,33 @@ tapeSigmaT2 = ([S "#", sig1, sig2, sig2, sig2, S "#", sig1], S "#", [S "#"])
 tapeSigmaT3 :: Tape
 tapeSigmaT3 = ([S "#", sig2, sig2, sig2, sig1, S "#", sig1], S "#", [S "#"])
 ---------------
+-- Reverse: que dada una tira de s´ımbolos sobre el alfabeto Σ = {σ1, σ2}, la devuelve invertida
+-- y separada por un blanco (#) de la palabra original.
+
+codeReverse :: Code
+codeReverse =
+  [ ("i", [(blank, (L, "q0"))])
+  , ("q0",[(sig1, (W (S"X"), "q1")),
+           (sig2, (W (S "X"), "q5")),
+           (blank, (R, "q8"))])
+  , ("q1", [(blank, (R, "q2")),
+            (WC, (R, "q1"))])
+  , ("q2", [(blank, (W sig1, "q3")),
+            (WC, (R, "q2"))])
+  , ("q3",[(S "X", (W sig1, "q4")),
+           (WC, (L, "q3"))])
+  , ("q4", [(WC, (L, "q0"))])
+  , ("q5",[(blank, (R, "q6")),
+           (WC, (R, "q5"))])
+  , ("q6",[(blank, (W sig2, "q7")),
+           (WC, (R, "q6"))])
+  , ("q7",[(S "X", (W sig2, "q4")),
+           (WC, (L, "q7"))])
+  , ("q8",[(blank, (W blank, "h")),
+           (WC, (R, "q8"))])
+  
+  ]
+
+tapeReverse :: Tape
+tapeReverse = ([S "#", sig2, sig2, sig2, sig1,sig2, sig2,sig1, sig1], S "#", [S "#"])
+--tapeReverse = ([S "#", sig1], S "#", [S "#", S "#"])
