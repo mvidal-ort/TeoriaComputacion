@@ -9,8 +9,7 @@ data Symbol = S String | WC
 blank :: Symbol
 blank = S "#"
 
-palo :: Symbol
-palo = S "|"
+
 
 instance Eq Symbol where -- voy a usar el lookup: el lookup usa el == para comparar
   (S s) == (S s') = s == s'
@@ -48,7 +47,7 @@ step (l, s, r) bs =
         L     -> (q', (init' l, last' l, s : r))
         R     -> (q', (l ++ [s], head' r, tail' r))
         W s'  -> (q', (l, s', r))
-    Nothing -> error "No hay transición para el símbolo actual"
+    Nothing -> error "No hay transición para el símbolo actual "
 
 iter :: Code -> Config -> Config
 iter code (q, tape)
@@ -111,8 +110,8 @@ codeCopiar =
 tapeCopiar :: Tape
 tapeCopiar = ([], S "1", [S "1", S "1", S "#"])
 ---------------------------
--- Lσ: que dada una tira de s´ımbolos sobre el alfabeto Σ = {σ1, σ2, σ3}, se mueve estrictamente
--- a la izquierda hasta encontrarse con el s´ımbolo σ,
+-- Lσ: que dada una tira de siımbolos sobre el alfabeto Σ = {σ1, σ2, σ3}, se mueve estrictamente
+-- a la izquierda hasta encontrarse con el siımbolo σ,
 codeLsigma :: Symbol -> Code
 codeLsigma sigma =
   [ ("i", [(sigma, (W sigma, "h")),   -- si encuentra σ, se detiene
@@ -130,3 +129,80 @@ sigma = S "B"
 ----------------------------
 -- Par: que dada una tira de sımbolos sobre el alfabeto Σ = {σ1}, determina si una tira de
 -- sımbolos tiene largo par o no.
+
+palo :: Symbol
+palo = S "|"
+
+codeParidad :: Code
+codeParidad =
+  [ ("i", [(S "#", (L, "q0"))])
+  , ("q0",[(palo, (L, "q0")),
+           (S "#", (W (S "#"), "q1"))])
+  , ("q1", [(S "#", (R, "q2"))])
+  , ("q2",[(palo, (R, "q5")),
+           (S "#", (R, "q3"))])
+  , ("q5",[(palo, (R, "q2")),
+           (S "#", (R, "q6"))])
+  , ("q6", [(S "#", (W (S "F"), "q4"))])
+  , ("q3", [(S "#", (W (S "T"), "q4"))])
+  , ("q4", [(WC, (R, "h"))])
+
+  ]
+
+
+tapeParVacia :: Tape
+tapeParVacia = ([S "#"], S "#", [])    -- izquierda: [#], cabeza sobre #
+
+tape4 :: Tape
+tape4 = ([S "#", palo, palo, palo, palo], S "#", [])
+
+tape3 :: Tape
+tape3 = ([S "#", palo, palo, palo], S "#", [])
+
+tape11 :: Tape
+tape11 = ([S "#", palo, palo, palo,palo, palo, palo,palo, palo, palo], S "#", [])
+
+------------------------------------
+-- Elemσ: que dada una tira de siımbolos sobre el alfabeto Σ = {σ1, σ2} y un siımbolo σ, determina
+-- si el siımbolo aparece en la palabra.
+
+-- Para ver si aparece S1
+codeElem :: Code
+codeElem =
+  [ ("i", [(blank, (L, "q0"))])
+  , ("q0",[(sig1, (L, "q1"))])
+  , ("q1", [(blank, (L, "q2"))])
+  , ("q2",[(sig1, (R, "q3")),
+           (sig2, (L, "q2")),
+           (blank, (R, "q8"))])
+  , ("q3",[(sig2, (R, "q3")),
+           (blank, (R, "q4"))])
+  , ("q4", [(sig1, (R, "q5"))])
+  , ("q5", [(blank, (R, "q6"))])
+  , ("q6", [(blank, (W (S "T"), "q7"))])
+  , ("q7", [(WC, (R, "h"))])
+  , ("q8",[(sig2, (R, "q8")),
+           (blank, (R, "q9"))])
+  , ("q9", [(sig1, (R, "q10"))])
+  , ("q10", [(blank, (R, "q11"))])
+  , ("q11", [(blank, (W (S "F"), "q7"))])
+
+  ]
+
+sig1 :: Symbol 
+sig1 = S "S1"
+
+sig2 :: Symbol -- Para probar con B
+sig2 = S "S2"
+
+tapeSigmaF :: Tape
+tapeSigmaF = ([S "#", sig2, sig2, sig2, sig2, S "#", sig1], S "#", [S "#"])
+
+tapeSigmaT :: Tape
+tapeSigmaT = ([S "#", sig2, sig1, sig2, sig2, S "#", sig1], S "#", [S "#"])
+
+tapeSigmaT2 :: Tape
+tapeSigmaT2 = ([S "#", sig1, sig2, sig2, sig2, S "#", sig1], S "#", [S "#"])
+
+tapeSigmaT3 :: Tape
+tapeSigmaT3 = ([S "#", sig2, sig2, sig2, sig1, S "#", sig1], S "#", [S "#"])
