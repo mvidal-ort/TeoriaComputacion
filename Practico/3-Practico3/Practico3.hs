@@ -237,3 +237,4 @@ codeReverse =
 tapeReverse :: Tape
 tapeReverse = ([S "#", sig2, sig2, sig2, sig1,sig2, sig2,sig1, sig1], S "#", [S "#"])
 --tapeReverse = ([S "#", sig1], S "#", [S "#", S "#"])
+--tapeReverse = ([S "#"], S "#", [S "#"])
