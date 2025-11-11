@@ -238,3 +238,43 @@ tapeReverse :: Tape
 tapeReverse = ([S "#", sig2, sig2, sig2, sig1,sig2, sig2,sig1, sig1], S "#", [S "#"])
 --tapeReverse = ([S "#", sig1], S "#", [S "#", S "#"])
 --tapeReverse = ([S "#"], S "#", [S "#"])
+
+-------------------------------
+-------------------------------
+-------------------------------
+-- VARIANTES --
+
+-- 1. MTr: con cinta infinita ´unicamente hacia la derecha:
+-- (a) ¿Que cambiar´ıa en la definici´on del paso de ejecuci´on T −¯b → (T′, q)?
+-- (b) ¿Es menos potente computacionalmente que las MT est´andar? Justifique.
+
+-- a) hay que considerar como es el paso de ejecución cuando se mueve a la izquierda
+-- si no se encuentra en la primera celda, el movimiento es igual a la máquina estandar
+-- si el cabezal se encuentra en la primera celda, puedo optarse por no permitir el movimiento o
+-- quedarse en el lugar. Esta ultima parece la mas razonable.
+-- b) No es menos potente que una maquina estandar. Se puede justificar si econtramos una manera
+-- de simular en la maquina variante, cualquier cosa codificada en la estandar.
+-- Ej: representar las posiciones a la izquierda del origen intercaladas con la derecha
+-- ... a(-2) a(-1) [#] a(0) a(1) a(2) ...
+-- a(0) a(-1) a(1) a(-2) a(2) ...
+
+-- 2. MTk: con multiples (k) cabezales con movimiento independiente.
+-- (a) Recuerde que para las MTs estandar las transiciones se codifican en un mapa ¯b : (q, σ) → (a, q′). 
+-- ¿Que cambios hay que hacer a ¯b para que soporte multicabezal?
+-- (b) ¿Es mas potente computacionalmente que las MT estandar? Justifique.
+-- (c) Defina una nueva version de Reverse usando dos cabezales y sin usar marcas 
+
+-- a) La funcion de transición ahora depende de k simbolos.
+-- y hay k movimientos individuales
+-- En una MT estandar una configuración indicaba un estado y una cinta (q,cinta)
+-- En una MTk se requiere ademas las posiciones de cada cabezal (q,cinta,p1​,p2​,…,pk​)
+-- hay que establecer como se escribe en una celda para un caso en que mas de un cabezal quisiera escribir
+
+-- b) No. Aunque parezca que tener varios cabezales da mas poder, toda MTk puede simularse en un MT estandar
+-- Ej: Símbolo real + marcas que indican dónde está cada cabezal.
+-- a b [c]^2 d [e]^1 f ...
+-- el cabezal 1 está sobre e, el cabezal 2 está sobre c.
+
+-- c) 
+
+
