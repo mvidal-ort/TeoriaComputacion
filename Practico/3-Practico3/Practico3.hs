@@ -63,19 +63,19 @@ exec code tape = snd (iter code (inicio, tape))
 -- Estas funciones del preludio dan error con listas vacías, cuidado
 init' :: [Symbol] -> [Symbol]
 init' [] = []
-init' xs = init xs
+init' xs = init xs --todos los elementos de la lista excepto el ultimo
 
 last' :: [Symbol] -> Symbol
 last' [] = S "#"
-last' xs = last xs
+last' xs = last xs --devuelve el ultimo elemento de la lista
 
 head' :: [Symbol] -> Symbol
 head' [] = S "#"
-head' xs = head xs
+head' xs = head xs -- devuelve el primer elemento
 
 tail' :: [Symbol] -> [Symbol]
 tail' [] = [S "#"]
-tail' xs = tail xs
+tail' xs = tail xs --devuelve la lista sin su primer elemento
 
 -----------------------
 codeEjemplo :: Code
@@ -275,6 +275,17 @@ tapeReverse = ([S "#", sig2, sig2, sig2, sig1,sig2, sig2,sig1, sig1], S "#", [S 
 -- a b [c]^2 d [e]^1 f ...
 -- el cabezal 1 está sobre e, el cabezal 2 está sobre c.
 
--- c) 
+-- c) El cabezal 1 apunta al inicio de la tira. El cabezal 2 se mueve hasta el final de la tira.
+-- Luego, mientras los símbolos bajo los dos cabezales no se crucen, intercambiás los símbolos 
+-- (el de la izquierda con el de la derecha), moviendo ambos cabezales hacia el centro.
+-- Cuando se cruzan (o se encuentran), el proceso termina.
+-- type Code2 = [(State, [(Symbol, Symbol, (Action, Action, State))])]
+-- cada transición depende de los dos símbolos leídos simultáneamente, 
+-- y devuelve una acción por cada cabezal (L, R o W s),
+-- junto con el nuevo estado.
 
+-- 3. MT2d: con una cinta bidimensional (infinita en todas direcciones).
+-- (a) ¿Cual es el conjunto de acciones que definirıa para esta maquina?
+-- (b) Defina una maquina XorBitABit que reciba dos vectores de binarios en filas contiguas (esto
+-- es, una matriz de dimension 2 × n) y devuelva el vector resultante en la fila de abajo.
 
