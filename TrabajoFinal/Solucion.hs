@@ -74,7 +74,7 @@ verifyA (formula, sol) =
 -- Hay que justificar esto en el informe
 
 
--- IMPLEMENTACION VERIFYA ----
+-- IMPLEMENTACION VERIFYB ----
 
 -- ¿Cómo accedo a D(pi,pj)D(pi,pj) en una [[Int]]?
 -- D(i,j)=distanceMatrix!!(i−1)!!(j−1) 
@@ -97,11 +97,16 @@ totalDistance :: DistanceMatrix -> BaseDistances -> SolB -> Int
 totalDistance dm bd route =
   let start = head route
       end   = last route
-      baseStart = lookupBaseDist bd start
-      baseEnd   = lookupBaseDist bd end
-      middleDist = sum (zipWith (dist dm) route (tail route))
+      baseStart = lookupBaseDist bd start -- distancia base → primer punto
+      baseEnd   = lookupBaseDist bd end -- distancia último punto → base      
+      middleDist = distBetweenConsecutive dm route -- suma de distancias internas entre pares consecutivos
   in baseStart + middleDist + baseEnd
 
+distBetweenConsecutive :: DistanceMatrix -> [Point] -> Int
+distBetweenConsecutive _  []  = 0
+distBetweenConsecutive _  [_] = 0   -- una lista con un solo punto no tiene tramos internos
+distBetweenConsecutive dm (p:q:rest) =
+  dist dm p q + distBetweenConsecutive dm (q:rest)
 
 -- La función r:P→N se representa como una lista (Point, Int) 
 -- porque en un lenguaje puramente declarativo como Haskell, las entradas del problema deben ser datos, no funciones.
@@ -141,3 +146,7 @@ verifyB (dom, route) =
 -- LA LETRA PIDE EXPLICITAMENTE EN EL PUNTO 1.2:
 -- Justificar formalmente que ambas funciones pueden evaluarse en tiempo polinomial respecto al tamaño
 -- de la entrada.
+
+--- 1.3
+-- SolveA 
+
