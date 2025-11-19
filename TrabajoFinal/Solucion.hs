@@ -150,3 +150,64 @@ verifyB (dom, route) =
 --- 1.3
 -- SolveA 
 
+-- Dado un DomA (la fórmula en CNF), solveA debe:
+-- Obtener todas las variables de la fórmula.
+-- Generar todas las posibles asignaciones (valuaciones) para esas variables.
+-- Si hay n variables → hay 2^n valuaciones.
+-- Para cada valuación (cada SolA posible), ejecutar verifyA.
+-- Retornar True si alguna valuación satisface la fórmula.
+-- Retornar False si ninguna lo hace.
+-- Esto implementa exactamente la definición de NP:
+-- → adivinar (generar) una solución y → verificarla con verifyA.
+
+varsInFormula :: Formula -> [String]
+varsInFormula formula =
+  removeDuplicates [ v | clause <- formula -- 
+                       , (v, _) <- clause ]
+
+removeDuplicates :: Eq a => [a] -> [a]
+removeDuplicates []     = []
+removeDuplicates (x:xs) = x : removeDuplicates (filter (/= x) xs)
+
+allValuations :: [String] -> [SolA]
+allValuations [] = [[]]
+allValuations (v:vs) =
+  [ (v, False) : sol | sol <- allValuations vs ] ++
+  [ (v, True)  : sol | sol <- allValuations vs ]
+-- Toma la primera variable v.
+-- Genera todas las soluciones donde v = False.
+-- Genera todas donde v = True.
+-- Para cada caso, pega el valor al inicio.
+-- Esto genera exactamente 2^n valuaciones.
+
+solveA :: DomA -> Bool
+solveA formula =
+  let vars = varsInFormula formula
+      sols = allValuations vars
+  in any (\sol -> verifyA (formula, sol)) sols
+-- varsInFormula obtiene la lista de variables del SAT.
+-- allValuations vars genera todas las posibles asignaciones.
+-- any prueba cada SolA llamando a verifyA.
+-- Si alguna valuación satisface la fórmula → retorna True.
+-- Este algoritmo es exponencial, como corresponde a un solver (no a un verificador).
+
+
+
+
+
+----------------------------
+-- Para Probar
+
+-- Formula1 (x1∨¬x2∨x1)∧(¬x3∨x2)
+formula1 :: Formula
+formula1 =
+  [ [("x1",True), ("x2",False), ("x1",True)]
+  , [("x3",False), ("x2",True)]
+  ]
+
+formula2 :: Formula
+formula2 =
+  [ [("x1",True),("x2",False)]   -- x1 ∨ ¬x2
+  , [("x1",False),("x2",True)]   -- ¬x1 ∨ x2
+  ]
+
