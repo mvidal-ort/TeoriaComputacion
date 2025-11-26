@@ -255,7 +255,12 @@ solveB dom@(pts, _, _, _, _, _, _) = findFirst (allRoutes pts)
 -- Poda por distancia/prioridad parcial: construir rutas incrementalmente y podar ramas que ya exceden M o no alcanzan posible V. Esto reduce drásticamente el espacio buscado.
 -- Generación incremental: en vez de allRoutes, generar rutas recursivamente y verificar parciales para poda temprana — más eficiente y recomendable si quieres probar instancias medianas.
 
-
+---------------------------
+-- Para el fundamento teorico, si vamos a utilizar un problema intermedio para hacer reducciones, 
+-- hay que probar que la transitividad de reduccion pi < pi1 < pi2 => pi > pi2. En particular, las funciones
+-- polinomiales que se usar para pasar de uno a otro, pueden componerse en una f(g(y)), que a su vez es polinomial
+-- por lo tanto puede servir para hacer la reduccion pi pi2. 26/11 al principio de la clase, lo muestran en el pizarron
+-- es un problema de examen.
 
 ----------------------------
 -- Para Probar
