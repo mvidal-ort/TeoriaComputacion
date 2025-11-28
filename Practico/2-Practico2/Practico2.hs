@@ -58,8 +58,8 @@ bajaOne x' ((x,v):xs)
     | otherwise = (x,v):bajaOne x' xs
 
 eval :: E -> M -> V
-eval (K c es) m = Kv c (map (`eval` m) es )
-eval (Var x) m = case lookupM x m of 
+eval (K c es) m = Kv c (map (`eval` m) es ) -- este un truco para para que  m sea lo segundo que recibe eval
+eval (Var x) m = case lookupM x m of        -- se convierte en notacion infija
                 Just v -> v
                 Nothing -> error "no existe "
          
