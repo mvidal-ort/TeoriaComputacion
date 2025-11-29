@@ -107,6 +107,14 @@ buscarEnRamas id bs = lookup id bs
 valorAExpresion :: V -> E
 valorAExpresion (Kv id vs) = K id (map valorAExpresion vs)
 
+int2V :: Int -> V
+int2V 0 = Kv "0" []
+int2V num = Kv "S" [int2V (num-1)]
+
+v2Int :: V -> Int
+v2Int (Kv "0" []) = 0
+v2Int (Kv "S" [x]) = 1 + (v2Int x)
+
 -------------------
 -------------------
 
