@@ -115,6 +115,14 @@ v2Int :: V -> Int
 v2Int (Kv "0" []) = 0
 v2Int (Kv "S" [x]) = 1 + (v2Int x)
 
+listInt2V :: [Int] -> V
+listInt2V []     = Kv "Nil" []
+listInt2V (x:xs) = Kv "Cons" [int2V x, listInt2V xs]
+
+v2ListInt :: V -> [Int]
+v2ListInt (Kv "Nil" [])            = []
+v2ListInt (Kv "Cons" [x, rest])    = v2Int x : v2ListInt rest
+
 -------------------
 -------------------
 
