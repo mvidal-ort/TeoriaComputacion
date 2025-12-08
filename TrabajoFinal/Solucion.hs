@@ -68,19 +68,8 @@ verifyA :: (DomA, SolA) -> Bool
 verifyA (formula, sol) =
   all (evalClause sol) formula --all espera una funcion y una lista y devuelve True, si la funcion aplicada a cada elemento es True
 
--- Es polinomial porque:
--- evalLiteral → constante
--- evalClause → lineal en el tamaño de la cláusula
--- verifyA → lineal en el número de cláusulas
--- Hay que justificar esto en el informe
-
 
 -- IMPLEMENTACION VERIFYB ----
-
--- ¿Cómo accedo a D(pi,pj)D(pi,pj) en una [[Int]]?
--- D(i,j)=distanceMatrix!!(i−1)!!(j−1) 
--- !! es el operador de indexación de listas (0-based).
--- Restamos 1 porque los puntos empiezan en 1, pero las listas en Haskell empiezan en 0.
 
 -- Para evitar complicarse con los indices, usar funcion auxiliar que convierta a los identificadores de los puntos
 dist :: DistanceMatrix -> Point -> Point -> Int
@@ -108,12 +97,6 @@ distBetweenConsecutive _  []  = 0
 distBetweenConsecutive _  [_] = 0   -- una lista con un solo punto no tiene tramos internos
 distBetweenConsecutive dm (p:q:rest) =
   dist dm p q + distBetweenConsecutive dm (q:rest)
-
--- La función r:P→N se representa como una lista (Point, Int) 
--- porque en un lenguaje puramente declarativo como Haskell, las entradas del problema deben ser datos, no funciones.
--- Esta lista es equivalente a una tabla de valores de la función r.
--- Para obtener r(p), el programa simplemente aplica lookup sobre la lista.
--- El usuario (o la instancia del problema) provee la lista completa como parte del DomB.
 
 lookupPriority :: Priorities -> Point -> Int
 lookupPriority pr p =
@@ -143,24 +126,11 @@ verifyB (dom, route) =
 -- Priorización: O(|ruta|)
 -- Distancias: O(|ruta|)
 -- Lookups simples en listas pequeñas
--- Así que verifyB pertenece a P, como requiere la definición de revisor para problemas NP.
+-- Así que verifyB pertenece a P, como requiere la definición de verificador para problemas NP.
 
--- LA LETRA PIDE EXPLICITAMENTE EN EL PUNTO 1.2:
--- Justificar formalmente que ambas funciones pueden evaluarse en tiempo polinomial respecto al tamaño
--- de la entrada.
 
 --- 1.3
 -- SolveA 
-
--- Dado un DomA (la fórmula en CNF), solveA debe:
--- Obtener todas las variables de la fórmula.
--- Generar todas las posibles asignaciones (valuaciones) para esas variables.
--- Si hay n variables → hay 2^n valuaciones.
--- Para cada valuación (cada SolA posible), ejecutar verifyA.
--- Retornar True si alguna valuación satisface la fórmula.
--- Retornar False si ninguna lo hace.
--- Esto implementa exactamente la definición de NP:
--- → adivinar (generar) una solución y → verificarla con verifyA.
 
 varsInFormula :: Formula -> [String]
 varsInFormula formula =
@@ -182,13 +152,6 @@ allValuations (v:vs) =
 -- Para cada caso, pega el valor al inicio.
 -- Esto genera exactamente 2^n valuaciones.
 
--- Prgunta para el chat, donde quiero que muestr las soluciones generadas
-printAllValuations :: [String] -> IO ()
-printAllValuations vars = do
-    let sols = allValuations vars
-    mapM_ print sols
-
-
 solveA :: DomA -> Bool
 solveA formula =
   let vars = varsInFormula formula
@@ -200,7 +163,14 @@ solveA formula =
 -- Si alguna valuación satisface la fórmula → retorna True.
 -- Este algoritmo es exponencial, como corresponde a un solver (no a un verificador).
 
--- Pregunta para el chat en el informe, version que muestra las valuaciones por pantalla
+
+-- Debug por pantalla -- generado con chatgpt
+printAllValuations :: [String] -> IO ()
+printAllValuations vars = do
+    let sols = allValuations vars
+    mapM_ print sols
+
+-- Debug por pantalla -- generado con chatgpt
 -- solveA :: DomA -> IO Bool
 -- solveA formula = do
 --   let vars = varsInFormula formula
@@ -249,18 +219,8 @@ solveB dom@(pts, _, _, _, _, _, _) = findFirst (allRoutes pts)
         then Just r
         else findFirst rs
 
--- Variantes útiles (si querés)
--- Detener al primer hallazgo: ya implementado (devuelve la primera que verifique).
--- Imprimir progreso: convertir solveB a IO (Maybe SolB) e imprimir cada N rutas o al encontrar una válida.
--- Poda por distancia/prioridad parcial: construir rutas incrementalmente y podar ramas que ya exceden M o no alcanzan posible V. Esto reduce drásticamente el espacio buscado.
--- Generación incremental: en vez de allRoutes, generar rutas recursivamente y verificar parciales para poda temprana — más eficiente y recomendable si quieres probar instancias medianas.
-
 ---------------------------
--- Para el fundamento teorico, si vamos a utilizar un problema intermedio para hacer reducciones, 
--- hay que probar que la transitividad de reduccion pi < pi1 < pi2 => pi > pi2. En particular, las funciones
--- polinomiales que se usar para pasar de uno a otro, pueden componerse en una f(g(y)), que a su vez es polinomial
--- por lo tanto puede servir para hacer la reduccion pi pi2. 26/11 al principio de la clase, lo muestran en el pizarron
--- es un problema de examen.
+
 
 ----------------------------
 -- Para Probar
@@ -372,11 +332,6 @@ sol20 =
   , ("x20", False)
   ]
 
-
--- Mencionar en el informe que para evidenciar la diferencia en los ordenes entre solvA y verifyA
--- hay que lograr que explore que explore la mayor cantidad de soluciones posibles. Preferentemente
--- todas al utilizar una formula insatisfacible. Si se satisface con poca exploración, no se nota
--- la diferencia. 
 
 formula20_unsat :: Formula
 formula20_unsat =
