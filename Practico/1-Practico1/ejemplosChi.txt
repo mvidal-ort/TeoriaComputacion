@@ -68,3 +68,5 @@ rec altura. \t. case t of[
 
 
 
+---
+La idea es igual que chi pero con los contructores del data creado en Haskell

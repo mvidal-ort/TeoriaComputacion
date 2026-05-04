@@ -69,7 +69,8 @@ baja (xe@(x,e):s') x'
 -- y lista de expresiones. 
 efecto :: E -> Sigma -> E
 efecto (Var x) s =  busqueda x s -- devuelve la e asociada a x si esta, sino devuelve x (que tambien es una e)
-efecto (Cons k es) s = Cons k (map (`efecto` s) es) -- 
+efecto (Cons k es) s = Cons k (map (`efecto` s) es) -- el orden de los parametros hace que tenga que usar el operador infijo o alternativamente
+                                                    -- poner un lambda: efecto (Cons k es) s = Cons k (map (\e -> efecto e s) es)
 efecto (Abs x e) s = Abs x (efecto e (baja s x))
 efecto (Ap e1 e2) s = Ap (efecto e1 s) (efecto e2 s)
 efecto (Case e bs) s = Case (efecto e s) (map (`efectoRama` s) bs) -- Cuando aplico una sustitución a un case, la aplico al discriminante y también a cada rama, cuidando de no sustituir las variables que esa rama introduce como parámetros.

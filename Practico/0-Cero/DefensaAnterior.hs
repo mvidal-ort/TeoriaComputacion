@@ -6,7 +6,7 @@ module DefensaAnterior where
 
 import Data.List (subsequences)
 
--- Evaluador de expresiones para matrices 2x2 que prefixRelativeComponentInstallDirs
+-- Evaluador de expresiones para matrices 2x2 que permita la siguientes expresiones
 -- - Variables 
 -- - Asignaciones 
 -- - una matriz 2x2 con coeficientes enteros a, b, c, d
