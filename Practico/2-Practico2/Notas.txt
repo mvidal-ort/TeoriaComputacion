@@ -1,0 +1,10 @@
+En la imagen REglaSemnatica7bExec, hay un problema. Al usar la M en 
+(∆, M) ▷ local ...esta permitiendo usar las variables globales definidas 
+en  M dentro del Local y eso esta prohibido por la letra, en el punto 7b dice:
+Al ejecutar ∆, M ▷ f(e) on x ▷ ∆, M′, no es posible acceder
+a variables definidas en la memoria M dentro del programa p
+asociado a la funcion f en ∆.
+Esta la version de Diego como REglaSemnatica7bExecDiego
+Esta regla es si los parametros pasan por copia,
+Luego en la parte (f), pide comentar que cambiaría si los parámetros de la funcion
+se pasaran por referencia.
