@@ -15,7 +15,6 @@ data Symb = Blanco -- #
     | Sigma String
     | Comodin
     deriving (Show, Eq)
-    
 --Estados
 data Q = I 
     | H 
@@ -27,7 +26,6 @@ type L = [Symb] --Cinta Izquierda
 type R = [Symb] --Cinta Derecha
 type S = Symb --Símbolo Corriente
 type Cinta = (L,S,R)
-
 --Acciones
 data A = Mov_izq 
     | Mov_der 
@@ -74,7 +72,7 @@ lkup s ((sym, action, estado) : resto)
     | sym == Comodin && null (filter (\(x, _, _) -> x == s) resto) = (action, estado)
     | otherwise = lkup s resto
 
-
+paso :: Cinta -> [B] -> (Cinta, Q)
 paso ([], s, der) rs = case lkup s rs of
     (Mov_izq, estado) -> (([Blanco], Blanco, s : der), estado)
     (Mov_der, estado) -> if null der
