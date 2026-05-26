@@ -67,8 +67,8 @@ eval (Var x) m = case lookupM x m of        -- se convierte en notacion infija
 exec :: Program -> M -> M
 exec (Asig pairs) m =  --(asignacion multiple), pairs es la lista de id-Expresion
   let (xs, es) = unzip pairs --separa la expresion del identificador
-      vs = map (`eval` m) es --evalua las expresiones bajo y las asigna a una lista de valores resultantes
-  in updateM (zip xs vs) m -- hace el update de la memoria, asignanco los valores obtenidos a los ids anteriores
+      vs = map (`eval` m) es --evalua las expresiones bajo m y las asigna a una lista de valores resultantes
+  in updateM (zip xs vs) m -- hace el update de la memoria, asignando los valores obtenidos a los ids anteriores
 
 exec (Sec p1 p2) m =  
   let m' = exec p1 m -- ejecuta p1 sobre m y devuelve m'
@@ -83,6 +83,15 @@ exec (Case x bs) m = case (eval (Var x) m) of
   Kv c vs -> case (buscarEnRamas c bs) of
     Just (xs, p) -> case (length xs == length vs) of
       True -> exec (Local xs (Asig (zip xs (map valorAExpresion vs)) `Sec` p)) m
+      -- Esta ultima linea es mas facil de entender asi:
+  --  True ->
+  --    let es = map valorAExpresion vs --Convierte los valores del constructor en expresiones.
+  --      pares = zip xs es -- cada variable del patrón con su expresión correspondiente
+  --      asignacion = Asig pares -- Construye la asignación múltiple.
+  --      cuerpo = Sec asignacion p -- Construye el cuerpo del local, que primero asigna las variables del patrón y luego ejecuta el programa de la rama.
+  --      programaLocal = Local xs cuerpo -- Construye el programa local que introduce las variables del patrón.
+  --    in exec programaLocal m -- Ejecuta el programa local sobre la memoria m.
+
 
 exec (While x bs) m =
   case eval (Var x) m of
