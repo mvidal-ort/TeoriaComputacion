@@ -179,6 +179,66 @@ elemSigma s =
   ]
 
 
+reverseMT :: Code
+reverseMT =
+  [ ("i",
+      [ (S "#", (L, "buscar"))
+      ]
+    ),
+    ("buscar",
+      [ (S "a", (W (S "Xa"), "copiarA")),
+        (S "b", (W (S "Xb"), "copiarB")),
+        (S "Xa", (L, "buscar")),
+        (S "Xb", (L, "buscar")),
+        (S "#", (R, "restaurar"))
+      ]
+    ),
+    ("copiarA",
+      [ (S "#", (R, "writeA")),
+        (WC, (R, "copiarA"))
+      ]
+    ),
+    ("writeA",
+      [ (S "a", (R, "writeA")),
+        (S "b", (R, "writeA")),
+        (S "#", (W (S "a"), "volver"))
+      ]
+    ),
+    ("copiarB",
+      [ (S "#", (R, "writeB")),
+        (WC, (R, "copiarB"))
+      ]
+    ),
+    ("writeB",
+      [ (S "a", (R, "writeB")),
+        (S "b", (R, "writeB")),
+        (S "#", (W (S "b"), "volver"))
+      ]
+    ),
+    ("volver",
+      [ (S "a", (L, "volver")),
+        (S "b", (L, "volver")),
+        (S "Xa", (L, "volver")),
+        (S "Xb", (L, "volver")),
+        (S "#", (L, "buscar"))
+      ]
+    ),
+    ("restaurar",
+      [ (S "Xa", (W (S "a"), "restaurar")),
+        (S "Xb", (W (S "b"), "restaurar")),
+        (S "a", (R, "restaurar")),
+        (S "b", (R, "restaurar")),
+        (S "#", (R, "fin"))
+      ]
+    ),
+    ("fin",
+      [ (S "a", (R, "fin")),
+        (S "b", (R, "fin")),
+        (S "#", (W (S "#"), "h"))
+      ]
+    )
+  ]
+
 -- ===============--
 --- Para probar---
 -- ===============--
@@ -230,3 +290,7 @@ tapeElemN =
   ([S "b", S "b", S "b"],
    S "#",
    [S "#"])
+
+------------------
+tReverse :: Tape
+tReverse = ([S "a", S "b", S "a", S "a"], S "#", [S "#"])
