@@ -14,6 +14,7 @@ import Data.List
 --Ejercicio 1: Verificadores y solucionadores en Haskell
 --1.1 Representación de dominios y soluciones
 
+-- Para SAT
 type Literal  = (String, Bool) -- (nombre de la variable, signo)
 type Clause   = [Literal]      -- Lista de literales, que representan los ORs
 type Formula  = [Clause]       -- Lista de clausulas que representan los ANDs
@@ -21,11 +22,33 @@ type Formula  = [Clause]       -- Lista de clausulas que representan los ANDs
 type DomA = Formula            -- Este es el problema que queremos resolver
 type SolA = [(String, Bool)]   -- Cada solucion es una lista de variables y su signo, que se prueban en la formula
 
--- PREGUNTAR:
--- SolA debe contener asignaciones para todas las variables que aparecen en la fórmula.
--- Si falta alguna variable → la evaluación de SAT no está definida correctamente.
--- SolA puede incluir asignaciones extra (variables no usadas), porque se pueden ignorar.
--- Para cumplir la definición estándar de SAT, SolA debe ser una valuación total sobre el conjunto de variables relevantes.
+
+-- Para problema B
+type Vertex = String
+type Edge = (Vertex, Vertex)
+
+type DomB =
+  ( [Vertex]          -- Estaciones V
+  , [Edge]            -- Tranciciones Permitidas E
+  , [(Edge, Int)]     -- Costos de cada transición w
+  , [Edge]            -- Precedencias P
+  , [Edge]            -- Exclusiones Locales X
+  , Int               -- Costo Máximo k
+  )
+type SolB = [Vertex]
+
+-- ARGUMENTO PARA DOCUMENTAR
+-- De hecho, si empezás a agregar chequeos como:
+-- verificar que no haya variables repetidas en SolA;
+-- verificar que todas las variables de la fórmula aparezcan en SolA;
+-- verificar que no haya variables extra;
+-- vas a complicar el código sin aportar demasiado al objetivo principal del ejercicio.
+-- Además, cuando llegue la justificación de complejidad, es más fácil argumentar sobre el verificador actual.
+-- Lo único que sí anotaría para la defensa (aunque no lo programes) es algo como:
+-- Se asume que SolA representa una asignación completa de las variables de la fórmula. 
+--Si una variable no estuviera asignada, la función lookupVar produciría un error. Esta situación no se contempla porque, por definición, 
+--el certificado de SAT es una asignación total sobre las variables de la instancia.
+-- Esa observación demuestra que pensaste el tema y evita que el docente te sorprenda con una pregunta sobre casos borde.
 
 -- Recibe una formula a satisfacer y una solución a evaluar, si todas las clausulas de la solucion son true, entonces la solución es true
 verifyA :: (DomA, SolA) -> Bool
