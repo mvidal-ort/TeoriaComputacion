@@ -37,24 +37,53 @@ type DomB =
   )
 type SolB = [Vertex]
 
--- ARGUMENTO PARA DOCUMENTAR
--- De hecho, si empezás a agregar chequeos como:
--- verificar que no haya variables repetidas en SolA;
--- verificar que todas las variables de la fórmula aparezcan en SolA;
--- verificar que no haya variables extra;
--- vas a complicar el código sin aportar demasiado al objetivo principal del ejercicio.
--- Además, cuando llegue la justificación de complejidad, es más fácil argumentar sobre el verificador actual.
--- Lo único que sí anotaría para la defensa (aunque no lo programes) es algo como:
--- Se asume que SolA representa una asignación completa de las variables de la fórmula. 
---Si una variable no estuviera asignada, la función lookupVar produciría un error. Esta situación no se contempla porque, por definición, 
---el certificado de SAT es una asignación total sobre las variables de la instancia.
--- Esa observación demuestra que pensaste el tema y evita que el docente te sorprenda con una pregunta sobre casos borde.
+-- Controlar que la solución esté bien formada:
+-- Toda variable que aparece en la fórmula debe aparecer en la solución.
+-- No hay variables repetidas
+-- No hay variables adicionales
+
+-- Extrae las variables de la formula (AUXILIAR)
+variablesFormula :: Formula -> [String]
+variablesFormula formula =
+    nub [ var | clausula <- formula
+              , (var,_) <- clausula ]
+
+-- Extrae las variables de la solución (AUXILIAR)
+variablesSolucion :: SolA -> [String]
+variablesSolucion sol = map fst sol
+
+-- Verifica que no haya repetidos
+sinRepetidos :: Eq a => [a] -> Bool
+sinRepetidos xs = length xs == length (nub xs)
+    
+-- Verifica que no faltan variables
+noFaltanVariables :: Formula -> SolA -> Bool
+noFaltanVariables formula sol =
+    all (`elem` varsSol) varsFormula
+  where
+    varsFormula = variablesFormula formula
+    varsSol = variablesSolucion sol
+
+-- Verifica que no hay varibles adicionales
+sinVariablesExtra :: Formula -> SolA -> Bool
+sinVariablesExtra formula sol =
+    all (`elem` varsFormula) varsSol
+  where
+    varsFormula = variablesFormula formula
+    varsSol = variablesSolucion sol
+
+-- Solución bien formada
+solucionBienFormada :: Formula -> SolA -> Bool
+solucionBienFormada formula sol =
+       sinRepetidos (variablesSolucion sol)
+    && noFaltanVariables formula sol
+    && sinVariablesExtra formula sol
 
 -- Recibe una formula a satisfacer y una solución a evaluar, si todas las clausulas de la solucion son true, entonces la solución es true
 verifyA :: (DomA, SolA) -> Bool
-verifyA (formula, sol) =
-  all (evalClause sol) formula --all espera una funcion y una lista y devuelve True, si la funcion aplicada a cada elemento es True
-  -- Se currifica para usar (evalClause sol) como la funcion que espera all
+verifyA (formula, sol) = solucionBienFormada formula sol && all (evalClause sol) formula
+-- all espera una funcion y una lista y devuelve True, si la funcion aplicada a cada elemento es True
+-- Se currifica para usar (evalClause sol) como la funcion que espera all
 
 -- Evalua una clausula de SolA. Como cada clausula es la union de ORs, si algun literal de cada clausula es true, entonces es true
 evalClause :: SolA -> Clause -> Bool
