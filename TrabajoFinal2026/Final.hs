@@ -102,7 +102,59 @@ lookupVar sol v =
     Just val -> val
     Nothing  -> error ("Variable no asignada: " ++ v)
 
+-----
+verifyB :: (DomB, SolB) -> Bool
+verifyB (dom, sol) =
+       solucionBienFormadaB dom sol
+    && coberturaTotal dom sol
+    && transicionesValidas dom sol
+    && precedenciasValidas dom sol
+    && exclusionesValidas dom sol
+    && costoValido dom sol
 
+-- una unica aparición de una estacion (AUXILIAR)
+sinRepetidos :: Eq a => [a] -> Bool
+sinRepetidos xs = length xs == length (nub xs)
 
---type DomB = undefined
---type SolB = undefined
+-- Toda estación de debe aparecer en la solución
+noFaltanVertices :: [Vertex] -> SolB -> Bool
+noFaltanVertices vs sol = all (`elem` sol) vs
+
+-- No hay estaciones adicionales
+sinVerticesExtra :: [Vertex] -> SolB -> Bool
+sinVerticesExtra vs sol = all (`elem` vs) sol
+
+-- Solución bien formada
+solucionBienFormadaB :: DomB -> SolB -> Bool
+solucionBienFormadaB (vs,_,_,_,_,_) sol =
+       sinRepetidos sol
+    && noFaltanVertices vs sol
+    && sinVerticesExtra vs sol
+
+-- Funcion auxiliar para armar las aristas del grafo a recorrer (AUXILIAR)
+aristasRecorridas :: SolB -> [Edge]
+aristasRecorridas [] = []
+aristasRecorridas vs = zip vs (tail vs ++ [head vs]) -- supone que la lista tendra mas de una estacion
+-- Sirve para verificar las precedencias, las exclusiones y la cota de costo
+
+-- Transiciones válidas. A partir de las aristas de la solución, verifica que todas estén en las transiciones válidas [Edge]
+transicionesValidas :: [Edge] -> SolB -> Bool
+transicionesValidas es sol = all (`elem` es) (aristasRecorridas sol)
+
+-- Exlusiones. A partir de las aristas de la solucion, verifica que ninguna esté en la lista de exlusiones [Edge]
+exclusionesValidas :: [Edge] -> SolB -> Bool
+exclusionesValidas xs sol = all (`notElem` aristasRecorridas sol) xs
+
+--- Precedencia
+-- Obtengo la posicon de la estación en la lista solución
+posicion :: Eq a => a -> [a] -> Int
+posicion x xs =
+    head [ i | (i,y) <- zip [0..] xs, x == y ]
+
+-- Verifica que la posicion de cada estacion en la lista solucion respete las precedencias de [Edge]
+precedenciasValidas :: [Edge] -> SolB -> Bool
+precedenciasValidas ps sol =
+    all precedenciaValida ps
+  where
+    precedenciaValida (u,v) =
+        posicion u sol < posicion v sol
