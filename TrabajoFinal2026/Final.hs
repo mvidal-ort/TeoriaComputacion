@@ -29,7 +29,7 @@ type Edge = (Vertex, Vertex)
 
 type DomB =
   ( [Vertex]          -- Estaciones V
-  , [Edge]            -- Tranciciones Permitidas E
+  , [Edge]            -- Transiciones Permitidas E
   , [(Edge, Int)]     -- Costos de cada transición w
   , [Edge]            -- Precedencias P
   , [Edge]            -- Exclusiones Locales X
@@ -41,6 +41,9 @@ type SolB = [Vertex]
 -- Toda variable que aparece en la fórmula debe aparecer en la solución.
 -- No hay variables repetidas
 -- No hay variables adicionales
+
+
+-- 1.2 Verificadores en tiempo polinomial
 
 -- Extrae las variables de la formula (AUXILIAR)
 variablesFormula :: Formula -> [String]
@@ -104,17 +107,17 @@ lookupVar sol v =
 
 -----
 verifyB :: (DomB, SolB) -> Bool
-verifyB (dom, sol) =
-       solucionBienFormadaB dom sol
-    && coberturaTotal dom sol
-    && transicionesValidas dom sol
-    && precedenciasValidas dom sol
-    && exclusionesValidas dom sol
-    && costoValido dom sol
+verifyB ((vs, es, costos, p, x, k), sol) =
+       solucionBienFormadaB (vs, es, costos, p, x, k) sol
+    && transicionesValidas es sol
+    && precedenciasValidas p sol
+    && exclusionesValidas x sol
+    && costoValido costos k sol
 
 -- una unica aparición de una estacion (AUXILIAR)
-sinRepetidos :: Eq a => [a] -> Bool
-sinRepetidos xs = length xs == length (nub xs)
+-- es la misma que se usa en verifyA
+-- sinRepetidos :: Eq a => [a] -> Bool
+-- sinRepetidos xs = length xs == length (nub xs)
 
 -- Toda estación de debe aparecer en la solución
 noFaltanVertices :: [Vertex] -> SolB -> Bool
@@ -146,15 +149,46 @@ exclusionesValidas :: [Edge] -> SolB -> Bool
 exclusionesValidas xs sol = all (`notElem` aristasRecorridas sol) xs
 
 --- Precedencia
--- Obtengo la posicon de la estación en la lista solución
+-- Obtengo la posicion de la estación en la lista solución
 posicion :: Eq a => a -> [a] -> Int
 posicion x xs =
     head [ i | (i,y) <- zip [0..] xs, x == y ]
+-- Se genera una lista de pares (posición, estación) usando zip. 
+-- Se filtra aquellos pares cuyo vértice coincide con el buscado y me quedo únicamente con la posición. 
+-- Como la solución no tiene estaciones repetidas, el resultado es una lista con un único índice
+-- Hago head para quedarme con ese elemento (posicion del elemento x en la lista solución que me pasan)
 
--- Verifica que la posicion de cada estacion en la lista solucion respete las precedencias de [Edge]
+-- Verifica que la posicion de cada estacion en la lista solucion respete las precedencias [Edge]
 precedenciasValidas :: [Edge] -> SolB -> Bool
 precedenciasValidas ps sol =
     all precedenciaValida ps
   where
     precedenciaValida (u,v) =
         posicion u sol < posicion v sol
+
+-- Costo de una arista obtenida de w : E →R≥0 asigna un costo a cada transicion
+costoArista :: [(Edge, Int)] -> Edge -> Int
+costoArista costos e =
+    case lookup e costos of
+        Just c  -> c
+        Nothing -> error "Arista sin costo asociado"
+
+-- Costo total del recorrido.
+costoRecorrido :: [(Edge, Int)] -> SolB -> Int
+costoRecorrido costos sol =
+    sum (map (costoArista costos) (aristasRecorridas sol))
+-- aristasRecorridas es la funcion que arma las aristas a partir de las estaciones de la solucion 
+
+-- verifica contra la cota k
+costoValido :: [(Edge, Int)] -> Int -> SolB -> Bool
+costoValido costos k sol =
+    costoRecorrido costos sol <= k
+
+-----
+-- 1.3 Resolucion en tiempo exponencial
+-- solveA:
+-- Extraer todas las variables de la fórmula.
+-- Generar todas las asignaciones posibles.
+-- Buscar la primera que satisfaga verifyA.
+-- Devolverla.
+
