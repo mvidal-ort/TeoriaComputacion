@@ -47,9 +47,8 @@ type SolB = [Vertex]
 
 -- Extrae las variables de la formula (AUXILIAR)
 variablesFormula :: Formula -> [String]
-variablesFormula formula =
-    nub [ var | clausula <- formula
-              , (var,_) <- clausula ]
+variablesFormula formula = nub [ var | clausula <- formula, (var,_) <- clausula ]
+-- De la formula se queda con las clausulas, de cada clausla se queda con la parte de la variable y descarta el bool
 
 -- Extrae las variables de la solución (AUXILIAR)
 variablesSolucion :: SolA -> [String]
@@ -192,3 +191,213 @@ costoValido costos k sol =
 -- Buscar la primera que satisfaga verifyA.
 -- Devolverla.
 
+-- Extraer las variables de la fórmula (YA ESTA HECHA)
+-- variablesFormula :: Formula -> [String]
+-- variablesFormula formula = nub [ var | clausula <- formula, (var, _) <- clausula ]
+
+-- Generar todas las posibles soluciones a probar
+-- Aca aparece el factor 2^n
+generarAsignaciones :: [String] -> [SolA]
+generarAsignaciones [] = [[]]
+generarAsignaciones (v:vs) = [(v,valor) : asignacion | valor <- [True, False], asignacion <- generarAsignaciones vs]
+-- Construir una lista cuyos elementos son (v,valor) : asignacion, donde valor toma sucesivamente los valores de la lista [True, False] 
+-- y asignacion toma sucesivamente los valores generados por generarAsignaciones vs.
+-- Para cada valor posible de valor y para cada asignación generada para vs, 
+-- construir una nueva asignación agregando el par (v,valor) al comienzo de dicha asignación.
+
+-- Genera todas las soluciones que satisfacen la formula o vacia si no 
+asignacionesValidas :: Formula -> [SolA]
+asignacionesValidas formula = [ asignacion | asignacion <- generarAsignaciones (variablesFormula formula), verifyA (formula, asignacion)]
+-- Las prueba todas, no es eficiente, porque podría cortar en la primera que encuentra.
+
+-- hace case en la lista de soluciones generada
+solveA :: DomA -> SolA
+solveA formula = case asignacionesValidas formula of
+                    [] -> error "La formula no es satisfacible"
+                    (s:_) -> s
+              
+-- solveB:
+-- genera todas las soluciones válidas, usa permutation de Data.List
+-- Aca aparece el orden no polinomial. Permutations es de orden factorial, asi que como mínimo es eso.
+solucionesValidasB :: DomB -> [SolB]
+solucionesValidasB dom@(vs, _, _, _, _, _) = [sol | sol <- permutations vs, verifyB (dom, sol)]
+
+-- hace case en la lista de soluciones generada
+solveB :: DomB -> SolB
+solveB dom = case solucionesValidasB dom of
+                [] -> error "La instancia no tiene solucion"
+                (s:_) -> s
+
+-------
+-- =========================
+-- PRUEBAS solveA
+-- =========================
+
+testSolveA1 :: SolA
+testSolveA1 =
+    solveA
+      [ [("x",True)] ]
+
+testSolveA2 :: SolA
+testSolveA2 =
+    solveA
+      [ [("x",True),("y",True)] ]
+
+formulaA3 :: Formula
+formulaA3 =
+    [ [("x",True),("y",False)]
+    , [("y",True),("z",True)]
+    ]
+
+testSolveA3 :: SolA
+testSolveA3 = solveA formulaA3
+
+formulaA4 :: Formula
+formulaA4 =
+    [ [("x",True)]
+    , [("x",False)]
+    ]
+
+-- Si evalúas testSolveA4 dará error
+testSolveA4 :: SolA
+testSolveA4 = solveA formulaA4
+
+formulaA5 :: Formula
+formulaA5 =
+    [ [("x",True),("y",True)]
+    , [("x",False),("z",True)]
+    ]
+
+testSolveA5 :: Bool
+testSolveA5 =
+    verifyA (formulaA5, solveA formulaA5)
+
+
+-- =========================
+-- PRUEBAS solveB
+-- =========================
+
+domB1 :: DomB
+domB1 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C"),("C","A")]
+    , [(("A","B"),10),(("B","C"),5),(("C","A"),8)]
+    , []
+    , []
+    , 30
+    )
+
+testSolveB1 :: SolB
+testSolveB1 = solveB domB1
+
+domB2 :: DomB
+domB2 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C"),("C","A")]
+    , [(("A","B"),10),(("B","C"),5),(("C","A"),8)]
+    , []
+    , []
+    , 23
+    )
+
+testSolveB2 :: SolB
+testSolveB2 = solveB domB2
+
+domB3 :: DomB
+domB3 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C"),("C","A")]
+    , [(("A","B"),10),(("B","C"),5),(("C","A"),8)]
+    , []
+    , []
+    , 20
+    )
+
+-- Da error
+testSolveB3 :: SolB
+testSolveB3 = solveB domB3
+
+domB4 :: DomB
+domB4 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C"),("C","A")]
+    , [(("A","B"),10),(("B","C"),5),(("C","A"),8)]
+    , [("A","C")]
+    , []
+    , 30
+    )
+
+testSolveB4 :: SolB
+testSolveB4 = solveB domB4
+
+domB5 :: DomB
+domB5 =
+    ( ["A","B"]
+    , [("A","B"),("B","A")]
+    , [(("A","B"),5),(("B","A"),5)]
+    , [("A","B"),("B","A")]
+    , []
+    , 20
+    )
+
+-- Da error
+testSolveB5 :: SolB
+testSolveB5 = solveB domB5
+
+domB6 :: DomB
+domB6 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C"),("C","A")]
+    , [(("A","B"),10),(("B","C"),5),(("C","A"),8)]
+    , []
+    , [("A","B")]
+    , 30
+    )
+
+-- Da error
+testSolveB6 :: SolB
+testSolveB6 = solveB domB6
+
+domB7 :: DomB
+domB7 =
+    ( ["A","B","C"]
+    , [("A","B"),("B","C")]
+    , [(("A","B"),10),(("B","C"),5)]
+    , []
+    , []
+    , 30
+    )
+
+-- Da error
+testSolveB7 :: SolB
+testSolveB7 = solveB domB7
+
+domB8 :: DomB
+domB8 =
+    ( ["A","B","C","D"]
+    , [("A","B"),("B","C"),("C","D"),("D","A")]
+    , [(("A","B"),1),(("B","C"),1),(("C","D"),1),(("D","A"),1)]
+    , []
+    , []
+    , 10
+    )
+
+testSolveB8 :: SolB
+testSolveB8 = solveB domB8
+
+domB9 :: DomB
+domB9 =
+    ( ["A","B","C","D"]
+    , [("A","B"),("B","C"),("C","D"),("D","A")]
+    , [(("A","B"),2),(("B","C"),2),(("C","D"),2),(("D","A"),2)]
+    , []
+    , []
+    , 8
+    )
+
+testSolveB9 :: SolB
+testSolveB9 = solveB domB9
+
+testSolveB10 :: Bool
+testSolveB10 =
+    verifyB (domB1, solveB domB1)
