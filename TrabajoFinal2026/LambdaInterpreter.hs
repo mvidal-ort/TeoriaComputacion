@@ -262,7 +262,7 @@ multChurch =
 -- El objetivo de este experimento es comparar el desempeño entre:
 -- 1. evaluación tradicional basada en sustitución (sin sharing)
 -- 2. evaluación con sharing explícito
-
+--import System.CPUTime -- Agregado para la parte2.Ej 9, comparación experimental
 -- Funcion de benchmarking
 benchmark :: Expr -> IO ()
 benchmark expr = do

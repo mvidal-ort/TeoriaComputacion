@@ -7,7 +7,7 @@
 -- La Forma Normal Conjuntiva (FNC) conjunción de disyunciones, donde se unen varias cláusulas mediante ANDs
 -- y cada cláusula contiene literales unidos por ORs
 
-module Final where
+module Solucion where
 
 import Data.List
 
