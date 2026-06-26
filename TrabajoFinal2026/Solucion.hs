@@ -228,10 +228,8 @@ solveB dom = case solucionesValidasB dom of
                 [] -> error "La instancia no tiene solucion"
                 (s:_) -> s
 
--------
--- =========================
+
 -- PRUEBAS solveA
--- =========================
 
 testSolveA1 :: SolA
 testSolveA1 =
@@ -258,7 +256,7 @@ formulaA4 =
     , [("x",False)]
     ]
 
--- Si evalúas testSolveA4 dará error
+-- da error
 testSolveA4 :: SolA
 testSolveA4 = solveA formulaA4
 
@@ -273,9 +271,8 @@ testSolveA5 =
     verifyA (formulaA5, solveA formulaA5)
 
 
--- =========================
+
 -- PRUEBAS solveB
--- =========================
 
 domB1 :: DomB
 domB1 =

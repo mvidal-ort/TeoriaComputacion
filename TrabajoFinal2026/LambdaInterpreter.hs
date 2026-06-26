@@ -77,7 +77,15 @@ subst x n expr =
 --         (Lam "y"
 --             (App (Var "x") (Var "y"))))
 -- :}
+
+-- devuelve:
+-- Lam "y"
+--     (Lam "y"
+--         (App (Var "y") (Var "y")))
 -- Deberia devolver: 
+-- Lam "y'"
+--     (Lam "y''"
+--         (App (Var "y") (Var "y''")))
 
 -- -- Ejercicio 4: Semántica operacional
 --     step :: Expr -> Maybe Expr  -- la función debe realizar exactamente un paso de evaluación.
