@@ -1,3 +1,4 @@
+-- 68694 Martin Vidal
 {-#LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -fno-warn-tabs #-}
 {-# OPTIONS_GHC -fno-warn-missing-methods #-}

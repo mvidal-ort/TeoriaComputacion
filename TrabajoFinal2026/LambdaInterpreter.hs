@@ -1,3 +1,4 @@
+-- 68694 Martin Vidal
 {-#LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -fno-warn-tabs #-}
 {-# OPTIONS_GHC -fno-warn-missing-methods #-}
@@ -92,34 +93,6 @@ subst x n expr =
 -- Si la expresión puede reducirse: Just exprReducida
 -- Si ya no puede reducirse: Nothing
 
--- Estrategia de evaluación: Call-by-value
--- El orden de evaluación es:
--- 1. evaluar primero la función
--- 2. luego el argumento
--- 3. aplicar beta-reducción solo cuando el argumento sea un valor
-
--- Definición de valor: En este intérprete, un valor es una abstracción lambda:  λx.M
--- Variables y aplicaciones no son valores.
-
--- Reglas de evaluación
--- 1. Beta-reducción:   (λx.M)V → M[x := V] -- Solo cuando V sea valor.
-
--- 2. Aplicación izquierda-- Si:  M1 → M1' Entonces: M1 M2 → M1' M2
--- Primero se intenta reducir la función.
-
--- 3. Aplicación derecha-- Si:  M2 → M2' Entonces:  V M2 → V M2'
--- Solo si V ya es un valor.
-
-
--- Estrategia de implementación por casos:
--- 1. Variable:   No reduce → Nothing
--- 2. Lambda:   No se reduce el cuerpo en call-by-value → Nothing
--- 3. Aplicación:
---    Subcasos:
---    - si hay beta-reducción posible, aplicarla
---    - si no, intentar reducir izquierda
---    - si izquierda ya es valor, reducir derecha
-
 isValue :: Expr -> Bool
 isValue expr =
     case expr of
@@ -152,11 +125,6 @@ step expr =
 
 -- Ejercicio 5: Evaluación completa
 -- eval :: Expr -> Expr -- la función eval aplica repetidamente la semántica small-step hasta alcanzar una expresión que ya no pueda reducirse.
-
--- Estrategia:
--- 1. Aplicar step sobre la expresión actual.
--- 2. Si step devuelve Nothing: la expresión está en forma normal y se devuelve.
--- 3. Si step devuelve Just expr': continuar evaluando recursivamente expr'.
 
 eval :: Expr -> Expr
 eval expr =
